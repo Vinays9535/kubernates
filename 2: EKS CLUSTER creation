@@ -2,4 +2,31 @@
                                                                                             <EKS CLUSTER creation started>
 
 * go to eks cluster console,create cluster,Configuration options{Quick configuration} then do Cluster configuration then create this time cluster creation is complited give 10 minute.
-* after cluster status active, go to compute and create NODEGROUP
+* after cluster status active, go to compute and create NODEGROUP,
+
+
+   1. Cluster IAM Role (EKS Cluster Role)
+
+This role is used by the EKS control plane itself.
+Attached policies:
+
+AmazonEKSClusterPolicy
+
+AmazonEKSVPCResourceController
+
+2. Node IAM Role (Worker Node / Built-in Node Pool Role)
+
+This role is assumed by the EC2 instances (or Fargate tasks) in your node pool.
+Attached policies:
+
+AmazonEKSWorkerNodePolicy – lets nodes join the cluster and communicate with the control plane.
+
+AmazonEC2ContainerRegistryReadOnly – lets nodes pull images from Amazon ECR.
+
+AmazonEKS_CNI_Policy – allows the CNI plugin to manage network interfaces.
+
+3. Fargate Pod Execution Role (if using Fargate-based built-in node pools)
+
+Attached policies:
+
+AmazonEKSFargatePodExecutionRolePolicy
