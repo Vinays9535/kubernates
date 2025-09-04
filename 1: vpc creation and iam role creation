@@ -1,0 +1,16 @@
+                                                                               <vpc creation started>
+
+* first create one vpc security group with open all trafic in inbond and out bond roule.
+* create vpc and create internet gateway attached internet gateway.
+* create subnets in public then auto assingn public ip select everyone subnet go to actions edit subnet settings enable auto assign public ip.
+* create routetable and do subnet assosiation and edit routes.
+                                                                              <vpc creation is complited>
+
+        
+
+                                                                               <IAM ROLE creation started>
+
+* go to IAM console click roles,create roles,Select trusted entity{aws service},usecase {ec2},Add permissions{AmazonEC2ContainerRegistryPullOnly,AmazonEC2ContainerRegistryReadOnly,AmazonEKS_CNI_Policy,AmazonEKSWorkerNodeMinimalPolicy,AmazonEKSWorkerNodePolicy}then create role.
+* go to IAM console click roles,create roles,Select trusted entity{aws service},usecase {EKS},select{EKS - Cluster or EKS - Auto Cluster},auto select AmazonEKSClusterPolicy,then next then write role name then create role.                                                                              
+
+                                                                               <IAM ROLE creation complited>
