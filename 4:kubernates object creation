@@ -1,0 +1,180 @@
+
+                                                                                                  1). namespace object creation
+
+* Shows all namespaces currently in the cluster:
+  kubectl get namespaces
+
+* This creates a new namespace named amma
+  kubectl create namespace amma
+
+* View namespace details ,Shows labels, annotations, resource quotas, and status of the namespace.
+  kubectl describe namespace amma
+
+                                                                                    (first create a custom name space after we set deafult namespace)
+
+* Check current context namespace, show default name space
+  kubectl config view --minify | grep namespace:
+
+* Set new default namespace
+  kubectl config set-context --current --namespace=amma
+
+* Check current context namespace, show default name space
+  kubectl config view --minify | grep namespace:
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+                                                                                                    2). Create secret object 
+                                                                                                     
+* Create secret object command
+  kubectl create secret docker-registry my-docker-secret \
+  --docker-server=https://index.docker.io/v1/ \
+  --docker-username=YOUR_DOCKER_USERNAME \
+  --docker-password=YOUR_DOCKER_PASSWORD \
+  --docker-email=YOUR_EMAIL
+
+
+* 🔹 Explanation:
+
+--my-docker-secret → Secret name.
+
+--docker-server → Registry URL (https://index.docker.io/v1/ for Docker Hub).
+
+--docker-username → Your Docker Hub username.
+
+--docker-password → Your Docker Hub password / access token.
+
+--docker-email → Your email. 
+
+
+*  kubectl get secrets  or  kubectl get svc
+*  kubectl describe secret my-docker-secret
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                                                                                                   
+                                                                                              3). pod object creation with secret and container port
+
+Uses a Secret for private Docker registry login
+
+Runs a container with an exposed container port    
+
+* first create one file cold pod.yaml
+  touch pod.yaml
+  vim pod.yaml
+  cat pod.yaml
+  
+
+example:::
+
+   apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+  labels:
+    app: my-pod
+spec:
+  containers:
+  - name: my-pod
+    image: vinaykumars064/cicd-repo:latest                # private image
+    ports:
+    - containerPort: 80                            # container port exposed
+  imagePullSecrets:
+  - name: my-docker-secret                         # secret created earlier
+
+
+
+  Steps to Use ::
+
+  *  Apply the Pod
+     kubectl apply -f pod.yaml
+
+  *  Verify pod status
+     kubectl get pods
+     kubectl describe pod my-pod
+
+
+
+
+  ✅ What happens here?
+
+      Kubernetes uses my-docker-secret to log in to Docker Hub (or your registry).
+
+      The Pod pulls private-nginx:latest.
+
+      The container exposes port 80 internally (you can later attach a Service to make it accessible). 
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------      
+
+      
+                                                                                          4). deployment object creation with secret and container port
+
+
+
+Here’s a ready-to-use deployment.yaml that creates a Deployment in Kubernetes with:
+
+Secret for pulling a private Docker image
+
+Container port exposed
+
+
+* first create one file cold deployment.yaml
+  touch deployment.yaml
+  vim deployment.yaml
+  cat deployment.yaml
+  
+
+example:::
+
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app-deployment
+  labels:
+    app: my-app
+spec:
+  replicas: 2                                # number of Pods to run
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-app-container
+        image: your-docker-user/your-private-image:latest   # replace with your private image
+        ports:
+        - containerPort: 8080                               # expose port inside container
+      imagePullSecrets:
+      - name: my-docker-secret                              # secret created earlier
+
+
+
+
+1. Apply the Deployment
+kubectl apply -f deployment.yaml
+
+2. Verify
+kubectl get deployments
+kubectl get pods
+kubectl describe deployment my-app-deployment
+
+
+✅ Explanation
+
+replicas: 2 → runs 2 Pods for scaling.
+
+containerPort: 8080 → container listens on port 8080.
+
+imagePullSecrets → allows Kubernetes to use the secret when pulling from a private Docker registry.
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                                                                                                  
+                                                                                                  
