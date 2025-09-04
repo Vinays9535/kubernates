@@ -7,7 +7,7 @@
                                                                               <vpc creation is complited>
 
         
-
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
                                                                                <IAM ROLE creation started>
 
 * go to IAM console click roles,create roles,Select trusted entity{aws service},usecase {ec2},Add permissions{AmazonEC2ContainerRegistryReadOnly,AmazonEKS_CNI_Policy,AmazonEKSWorkerNodePolicy}then create role.
@@ -17,17 +17,18 @@
 
 
 
-
+------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                                                                                  continue with IAM
 
 
 1. Cluster IAM Role (EKS Cluster Role)
-
 This role is used by the EKS control plane itself.
-Attached policies:
 
+Attached policies: 
 AmazonEKSClusterPolicy
-
 AmazonEKSVPCResourceController
+
+-------------------------------------------------------------------------------------------------------------------------
 
 2. Node IAM Role (Worker Node / Built-in Node Pool Role)
 
@@ -40,8 +41,9 @@ AmazonEC2ContainerRegistryReadOnly – lets nodes pull images from Amazon ECR.
 
 AmazonEKS_CNI_Policy – allows the CNI plugin to manage network interfaces.
 
+----------------------------------------------------------------------------------------------------------------------------
+
 3. Fargate Pod Execution Role (if using Fargate-based built-in node pools)
 
 Attached policies:
-
 AmazonEKSFargatePodExecutionRolePolicy
