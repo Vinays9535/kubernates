@@ -28,6 +28,13 @@ Attached policies:
 AmazonEKSClusterPolicy
 AmazonEKSVPCResourceController
 
+                  AND
+
+AmazonEKSBlockStoragePolicy
+AmazonEKSComputePolicy
+AmazonEKSLoadBalancingPolicy
+AmazonEKSNetworkingPolicy
+
 -------------------------------------------------------------------------------------------------------------------------
 
 2. Node IAM Role (Worker Node / Built-in Node Pool Role)
