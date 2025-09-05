@@ -296,3 +296,87 @@ curl http://172.20.85.52:8080
 
                                                                                                   
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+                                                                                                 5). service object 
+
+                                                                                                    B) node port ip
+
+
+Creates a Deployment
+Uses a Secret for pulling private Docker images
+Exposes the app on port 8010 (your Gunicorn app)
+Exposes the app externally using a NodePort Service
+
+
+touch deployment.yaml
+vim deployment.yaml
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+  labels:
+    app: my-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: my-deployment
+  template:
+    metadata:
+      labels:
+        app: my-deployment
+    spec:
+      containers:
+      - name: my-deployment
+        image: vinaykumars064/cicd-repo:latest   # replace with your private image if needed
+        ports:
+        - containerPort: 8010                    # container listens on 8010 (Gunicorn)
+      imagePullSecrets:
+      - name: my-docker-secret                   # Secret for private repo
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+  labels:
+    app: my-service
+spec:
+  type: NodePort                                # Expose externally
+  selector:
+    app: my-service
+  ports:
+  - port: 80             # Service port (what clients use)
+    targetPort: 8010     # Pod containerPort (Gunicorn)
+    nodePort: 30080      # External port (between 30000–32767)
+
+
+
+
+✅ Apply this YAML
+kubectl apply -f deployment.yaml
+
+
+✅ Get NodePort and Test
+Get service details:
+
+* kubectl get svc <my-app-service>
+
+Example output:
+
+NAME             TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
+my-app-service   NodePort   10.100.200.15  <none>        80:30080/TCP   1m
+
+* kubectl get nodes -o wide
+
+Get your EC2 node public IP:
+
+* curl ifconfig.me
+
+Test from your EC2 or browser:
+
+* curl http://<EC2-Public-IP>:30080
