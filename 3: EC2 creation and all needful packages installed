@@ -67,3 +67,40 @@ aws eks update-kubeconfig --region ap-south-1 --name <your-cluster-name>
 🔹 3. Test connection
 kubectl get nodes
 If your nodes are running, you’ll see them listed.
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+error accoring tray this
+
+
+✅ Next steps to fix kubectl
+
+Step 1. Refresh kubeconfig
+Re-run:
+aws eks update-kubeconfig --region ap-south-1 --name my-cluster
+
+Step 2. Check what server your kubeconfig points to
+kubectl config view --minify | grep server:
+
+👉 It should now resolve to a hostname like:
+
+https://<cluster-id>.gr7.ap-south-1.eks.amazonaws.com
+
+
+Step 3. Test DNS resolution
+Run:
+nslookup 5B12D8692848263B5BEDB084FC474BB2.gr7.ap-south-1.eks.amazonaws.com
+or
+dig 5B12D8692848263B5BEDB084FC474BB2.gr7.ap-south-1.eks.amazonaws.com
+
+
+👉 If it shows a public IP (13.x.x.x or 3.x.x.x) → good.
+👉 If it still shows 10.x.x.x → your EC2 is still caching the old DNS. Restart resolver:
+
+sudo systemctl restart systemd-resolved
+
+Step 4. Test kubectl
+kubectl get svc
+kubectl get nodes
