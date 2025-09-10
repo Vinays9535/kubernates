@@ -7,35 +7,22 @@
                                                                               <vpc creation is complited>
 
         
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
                                                                                <IAM ROLE creation started>
 
-* go to IAM console click roles,create roles,Select trusted entity{aws service},usecase {ec2},Add permissions{AmazonEC2ContainerRegistryReadOnly,AmazonEKS_CNI_Policy,AmazonEKSWorkerNodePolicy}then create role.
+                                                                        (this both roles for creating a eks cluster)
+
+* go to IAM console click roles,create roles,Select trusted entity{aws service},usecase {ec2},Add permissions{AmazonEC2ContainerRegistryReadOnly,AmazonEKS_CNI_Policy,AmazonEKSWorkerNodePolicy}then create role. create 2 roles in diffrent names one is cluster another one is nodegroup creation.
 * go to IAM console click roles,create roles,Select trusted entity{aws service},usecase {EKS},select{EKS - Cluster or EKS - Auto Cluster},auto select AmazonEKSClusterPolicy, and add AmazonEKSVPCResourceController,then next then write role name then create role.                                                                              
+                                                                      
+                                                                        (this role is created for creating a nodegroup)
+
+total creating 3 roles 2 rloes are eks another one is nodegroup
+
 
                                                                                <IAM ROLE creation complited>
 
-
-
-------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-                                                                                  continue with IAM
-
-
-1. Cluster IAM Role (EKS Cluster Role)
-This role is used by the EKS control plane itself.
-
-Attached policies: 
-AmazonEKSClusterPolicy
-AmazonEKSVPCResourceController
-
-                  AND
-
-AmazonEKSBlockStoragePolicy
-AmazonEKSComputePolicy
-AmazonEKSLoadBalancingPolicy
-AmazonEKSNetworkingPolicy
-
--------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 2. Node IAM Role (Worker Node / Built-in Node Pool Role)
 
