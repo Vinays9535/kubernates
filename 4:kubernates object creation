@@ -108,15 +108,15 @@ spec:
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------      
 
       
-                                                                                          4). deployment object creation with secret and container port
+                                                                                          4). deployment object creation with secret and container port and replicas
 
 
 
 Here’s a ready-to-use deployment.yaml that creates a Deployment in Kubernetes with:
 
-Secret for pulling a private Docker image
-
-Container port exposed
+*Secret for pulling a private Docker image
+*Container port exposed
+* with 2 replicas
 
 
 * first create one file cold deployment.yaml
@@ -182,7 +182,7 @@ imagePullSecrets → allows Kubernetes to use the secret when pulling from a pri
                                                                                                     A) cluster ip 
 
 
-create a deployment object with docker secrets and service ( cluster ip ) and port number with 2 replicas
+*create a deployment object with docker secrets and service ( cluster ip ) and port number with 2 replicas
 
 touch deployment.ymal : create one file
 vim deployment.yaml : copy and paste
@@ -305,54 +305,64 @@ curl http://172.20.85.52:8080
                                                                                                     B) node port ip
 
 
-Creates a Deployment
-Uses a Secret for pulling private Docker images
-Exposes the app on port 8010 (your Gunicorn app)
-Exposes the app externally using a NodePort Service
+Creates a Deployment object with usecases
+
+*Uses a Secret for pulling private Docker images
+*adding the 2 replicas
+*Exposes the app on port 8010 (your Gunicorn app)
+*Exposes the app externally using a NodePort Service
+*adding the node selector
 
 
-touch deployment.yaml
-vim deployment.yaml
+*touch deployment.yaml
+*vim deployment.yaml
+*cat deployment.yaml
 
 
+# ---------------- Deployment ----------------
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-deployment
+  name: my-deployment                       # Name of the deployment
   labels:
-    app: my-deployment
+    app: my-deployment                       # Label for identifying this deployment
 spec:
-  replicas: 2
+  replicas: 2                                # Number of pod replicas
   selector:
     matchLabels:
-      app: my-deployment
+      app: my-deployment                     # Match pods with this label
   template:
     metadata:
       labels:
-        app: my-deployment
+        app: my-deployment                   # Pods created will have this label
     spec:
+      nodeSelector:                          # Ensures pods only schedule on nodes with this label
+        vandana: vinay                       # Node must have label vandana=vinay
       containers:
       - name: my-deployment
-        image: vinaykumars064/cicd-repo:latest   # replace with your private image if needed
+        image: vinaykumars064/cicd-repo:latest   # Container image (update if needed)
         ports:
-        - containerPort: 8010                    # container listens on 8010 (Gunicorn)
+        - containerPort: 8010                # Gunicorn listens inside the pod on port 8010
       imagePullSecrets:
-      - name: my-docker-secret                   # Secret for private repo
+      - name: my-docker-secret               # Secret for pulling private images
+
 ---
+# ---------------- Service ----------------
 apiVersion: v1
 kind: Service
 metadata:
-  name: my-service
+  name: my-service                           # Service name
   labels:
     app: my-service
 spec:
-  type: NodePort                                # Expose externally
+  type: NodePort                             # Expose service externally via node’s IP + NodePort
   selector:
-    app: my-service
+    app: my-deployment                       # Must match pod label, so traffic routes correctly
   ports:
-  - port: 80             # Service port (what clients use)
-    targetPort: 8010     # Pod containerPort (Gunicorn)
-    nodePort: 30080      # External port (between 30000–32767)
+  - port: 80                                 # Service port (clients use this)
+    targetPort: 8010                         # Maps to containerPort 8010 in the pod
+    nodePort: 30080                          # Fixed NodePort (between 30000–32767)
+
 
 
 
@@ -380,3 +390,42 @@ Get your EC2 node public IP:
 Test from your EC2 or browser:
 
 * curl http://<EC2-Public-IP>:30080
+
+
+
+
+
+<<NODE SELECTOR>>
+
+ONE WAY : when we created the node group that time also add the lables 
+SECOND WAY : when we created the node group that time whithout adding the lables using below mentioned steaps
+
+🔹 Step 1: Label your EKS Nodes
+
+Pick a node and add a label (example: vandana=vinay):
+
+*kubectl get nodes
+
+
+Output example:
+
+NAME                                          STATUS   ROLES    AGE   VERSION
+ip-10-0-3-12.ap-south-1.compute.internal      Ready    <none>   1h    v1.33.4-eks
+ip-10-0-3-210.ap-south-1.compute.internal     Ready    <none>   1h    v1.33.4-eks
+
+
+Now label them:
+
+*kubectl label node ip-10-0-3-12.ap-south-1.compute.internal vandana=vinay
+*kubectl label node ip-10-0-3-210.ap-south-1.compute.internal vandana=vinay
+
+🔹 Step 2: Verify Node Labels
+
+*kubectl get nodes --show-labels | grep vandana
+
+
+You should see something like:
+
+...,kubernetes.io/os=linux,vinay=vandana
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
