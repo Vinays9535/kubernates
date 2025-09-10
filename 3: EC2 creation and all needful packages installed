@@ -3,7 +3,7 @@ launch one ec2 os ubuntu, instence type t2 medium , public enable , security gro
 login the ec2 using connect.
 
 install the all neccesary packages.
-
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 1) Steps to Install AWS CLI v2 (Latest)
 
 Run these commands one by one:
@@ -23,6 +23,8 @@ sudo ./aws/install
 
 # Verify version
 aws --version.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 2) Install kubectl v1.31.1 on Ubuntu
@@ -44,7 +46,7 @@ sudo mv kubectl /usr/local/bin/
 kubectl version --client
 
 
-
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 3) Step-by-Step: Install eksctl on Ubuntu.
 
@@ -66,11 +68,12 @@ You should see output like:
 
 eksctl version: 0.181.0
 
-
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 4) cluster to EC2 give access
  * go to profile, select security crendentials, and create access key then copy paste the keys to cli
+
  example:
  ubuntu@ip-10-0-2-86:~$ aws configure
 AWS Access Key ID [None]: 
@@ -79,6 +82,7 @@ Default region name [None]:
 Default output format [None]:
 ubuntu@ip-10-0-2-86:~$
 
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 5) Update kubeconfig for your EKS cluster
 
@@ -96,7 +100,7 @@ If your nodes are running, you’ll see them listed.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
+                                                                         if in case any error occuring 
 error accoring tray this
 
 
