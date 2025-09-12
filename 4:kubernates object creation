@@ -429,3 +429,106 @@ You should see something like:
 ...,kubernetes.io/os=linux,vinay=vandana
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+                                                                                                   5). service object 
+
+                                                                                                    B) load balancing ip
+
+
+when we create the subnets that time tag the subnets:
+-----------------------------------------------------
+✅ Fix
+
+You need to tag your subnets properly in AWS:
+
+**Public Subnets (for external LoadBalancer):
+Tag key: kubernetes.io/role/elb
+Value: 1
+
+**Private Subnets (for internal LoadBalancer):
+Tag key: kubernetes.io/role/internal-elb
+Value: 1
+
+**All subnets used by the cluster also need:
+Tag key: kubernetes.io/cluster/<your-cluster-name>
+Value: owned (if created by EKS) or shared
+
+
+another way to tag the subnets: You can add via AWS CLI too:
+------------------------------------------------------------
+
+aws ec2 create-tags \
+  --resources <subnet-id> \
+  --tags Key=kubernetes.io/role/internal-elb,Value=1 \
+         Key=kubernetes.io/cluster/<your-cluster-name>,Value=shared
+
+
+
+then 
+
+*touch deployment.yaml
+*vim deployment.yaml
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test123
+  labels:
+    app: test123
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: test123
+  template:
+    metadata:
+      labels:
+        app: test123
+    spec:
+      containers:
+        - name: test123
+          image: vinaykumars064/cicd-repo:latest
+          ports:
+            - containerPort: 80
+      imagePullSecrets:
+        - name: my-secret
+
+
+*kubectl apply -f deployment.yaml
+now app deployment is complited.
+
+
+then creating the service deployment: in this method service is not dependent for any deployment its saparate its indipendent.
+-------------------------------------------------------------------------------------------------------------------------------
+touch service.yaml
+vim service.yaml
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: test123-svc
+  namespace: amma
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: external
+spec:
+  selector:
+    app: test123
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP
+  type: LoadBalancer
+
+
+
+*kubectl apply -f service.yaml
+*kubectl get svc
+show external ip
+
+
+
+
