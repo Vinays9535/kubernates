@@ -280,6 +280,39 @@ You can test it inside a pod:
 kubectl exec -it <your-pod-name> -- curl http://my-app-service:80
 
 
+***another way to create cluster ip service for existing deployment.
+--------------------------------------------------------------------
+
+* kubectl expose deployment my-deployments --type=ClusterIP --name=my-service --port=80 --target-port=80
+
+
+What happens:
+
+Type: ClusterIP → Default service type. It makes the Service accessible only inside the cluster using the ClusterIP.
+
+--name=my-service → Service will be named my-service.
+
+--port=80 → Port the Service exposes inside the cluster.
+
+--target-port=80 → The port in your Pods that the Service forwards traffic to.
+
+Check service:
+*kubectl get svc my-service
+
+
+You’ll see something like:
+
+NAME         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+my-service   ClusterIP   10.96.172.34   <none>        80/TCP    5s
+
+Access:
+
+Accessible only from inside the cluster (e.g., from another Pod, or using kubectl port-forward).
+
+Example:
+
+curl http://10.96.172.34:80
+
 
 
 
@@ -394,8 +427,54 @@ Test from your EC2 or browser:
 
 
 
+***another way to create nodeport ip service for existing deployment.
+----------------------------------------------------------------------
+
+** kubectl expose deployment my-deployments --type=NodePort --name=my-service --port=80 --target-port=80
+
+
+Explanation of flags:
+
+deployment my-deployments → Refers to the Deployment you already created.
+
+--type=NodePort → Exposes the Service on a port of each Node (between 30000–32767).
+
+--name=my-service → The Service will be named my-service.
+
+--port=80 → The port your Service exposes (clients will use this).
+
+--target-port=80 → The port inside your Pod containers that traffic gets forwarded to.
+
+
+Example:
+
+If you run the above, you’ll get a Service. You can check it with:
+
+*kubectl get svc my-service
+
+
+It will show something like:
+
+NAME         TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
+my-service   NodePort   10.0.23.45     <none>        80:31543/TCP   5s
+
+
+Here:
+
+80 → Service port
+
+31543 → NodePort assigned (random unless you set it with --node-port=31543)
+
+You can then access your app from outside using:
+
+*http://<NodePublicIP>:31543
+
+
+
+
 
 <<NODE SELECTOR>>
+-------------------------
 
 ONE WAY : when we created the node group that time also add the lables 
 SECOND WAY : when we created the node group that time whithout adding the lables using below mentioned steaps
@@ -529,6 +608,52 @@ spec:
 *kubectl get svc
 show external ip
 
+
+
+***another way to create load balancing ip service for existing deployment.
+-----------------------------------------------------------------------------------
+
+*kubectl expose deployment my-deployments --type=LoadBalancer --name=my-service --port=80 --target-port=80
+
+
+What happens:
+
+Type: LoadBalancer → Creates an external cloud load balancer (like AWS ELB, GCP LB, Azure LB) and assigns an external IP or hostname.
+
+--port=80 → Clients use this port to connect.
+
+--target-port=80 → Traffic gets forwarded to port 80 in the Pod containers.
+
+--name=my-service → Service is named my-service.
+
+Check service:
+*kubectl get svc my-service
+
+
+You’ll see something like:
+
+NAME         TYPE           CLUSTER-IP     EXTERNAL-IP       PORT(S)        AGE
+my-service   LoadBalancer   10.96.33.120   a1b2c3d4.elb.amazonaws.com   80:31234/TCP   5s
+
+
+Cluster-IP: Internal service IP
+
+EXTERNAL-IP: Public IP or DNS of your load balancer (may take a few minutes to appear).
+
+80:31234 → 80 is service port, 31234 is nodeport backing the LB.
+
+Access:
+
+Once the EXTERNAL-IP is ready, you can test it:
+
+curl http://<EXTERNAL-IP>:80
+
+
+⚠️ Since you’re using EKS (AWS) from your earlier messages:
+
+Make sure your worker nodes have IAM policies that allow creating ELBs.
+
+Subnets must be public (with internet gateway) if you need a public external IP.
 
 
 
