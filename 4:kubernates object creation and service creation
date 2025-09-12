@@ -819,3 +819,134 @@ metrics-server-6c9c8c9b5c-abc12   1/1   Running   0   5m
 if in case not installed now install using these steps:
 ------------------------------------------------------------
 
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+                                                                                       Taints and Tolerations:
+                                                                                     ----------------------------
+
+step by step with Kubernetes Taints and Tolerations:
+
+1. What are Taints and Tolerations?
+
+Taint (applied on Node): Stops pods from scheduling on a node unless the pod has a matching toleration.
+
+Toleration (applied on Pod): Allows a pod to “tolerate” the taint and get scheduled on that node.
+
+👉 Think of it like:
+
+Taint = Keep out sign on the node
+
+Toleration = Special pass for pods to enter
+
+2. Apply a Taint on a Node
+
+Command:
+
+*kubectl taint nodes <node-name> key=value:NoSchedule
+
+
+Example:
+
+*kubectl taint nodes worker-node1 role=database:NoSchedule
+
+
+This means: only pods with a toleration for role=database can run on worker-node1.
+
+NoSchedule → Pods without toleration won’t be scheduled here.
+
+Other effects:
+
+NoSchedule → don’t schedule pods unless toleration exists.
+
+PreferNoSchedule → try to avoid scheduling but not strict.
+
+NoExecute → evict existing pods if they don’t have toleration.
+
+3. Add Toleration in Pod Spec
+
+You add tolerations in the pod YAML under spec.tolerations.
+
+Example pod tolerating the above taint:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-db-pod
+spec:
+  containers:
+  - name: my-db-container
+    image: mysql:5.7
+  tolerations:
+  - key: "role"
+    operator: "Equal"
+    value: "database"
+    effect: "NoSchedule"
+
+4. Verify Taints on Node
+kubectl describe node <node-name> | grep Taints
+
+5. Remove a Taint
+kubectl taint nodes <node-name> key=value:NoSchedule-
+
+
+(Note the - at the end → removes the taint)
+
+✅ Summary:
+
+Taint nodes to restrict which pods can run there.
+
+Tolerations in pods allow them to bypass the restriction.
+
+
+my example 
+
+
+ mainly two ways to taint a node
+---------------------------------
+
+*one way is go to node group select node group edit node group add "Kubernetes taints" then next.
+*another way is used to command :  kubectl taint nodes <node-name> appa=amma:NoSchedule
+
+and then add the toleration in deployment.yaml file example 
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app-deployment
+  labels:
+    app: my-app
+spec:
+  replicas: 2                                # number of Pods to run
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-app-container
+        image: vinaykumars064/cicd-repo:latest   # replace with your private image
+        ports:
+        - containerPort: 8080                               # expose port inside container
+      imagePullSecrets:
+      - name: my-docker-secret
+      tolerations:
+      - key: "appa"
+        operator: "Equal"
+        value: "amma"
+        effect: "NoSchedule"
+
+
+* kubectl apply -f deployment.yaml
+* kubectl get pods
+
+Verify Taints on Node:
+* kubectl describe node <node-name> | grep Taints
+
+Remove a Taint:
+* kubectl taint nodes <node-name> key=value:NoSchedule-
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
