@@ -656,4 +656,166 @@ Make sure your worker nodes have IAM policies that allow creating ELBs.
 Subnets must be public (with internet gateway) if you need a public external IP.
 
 
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+                                                                                   HORIZONTAL POD AUTOSCALING (HPA)
+
+
+touch deployment.yaml
+vim deployment.yaml
+
+
+✅ 1. Update Deployment with nodeSelector
+
+Here’s your Deployment YAML with nodeSelector added (key = vinay, value = vandana):
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app-deployment
+  labels:
+    app: my-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      nodeSelector:
+        vinay: vandana                  # Pods will only schedule on nodes with this label
+      containers:
+      - name: my-app-container
+        image: your-docker-user/your-private-image:latest
+        ports:
+        - containerPort: 8080
+      imagePullSecrets:
+      - name: my-docker-secret
+
+
+
+✅ 2. Create HPA using command
+
+You can create an HPA (autoscaler) for this Deployment using kubectl autoscale:
+
+*kubectl autoscale deployment my-app-deployment \
+  --cpu-percent=50 \
+  --min=2 \
+  --max=5
+
+
+--cpu-percent=50 → Target average CPU utilization across Pods is 50%.
+
+--min=2 → Minimum 2 Pods.
+
+--max=5 → Maximum 5 Pods.
+
+Check HPA status:
+
+*kubectl get hpa
+
+
+another way
+--------------
+✅ 3. HPA YAML file
+
+If you prefer YAML, here’s the equivalent:
+
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: my-app-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: my-app-deployment
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
+
+
+Apply it:
+
+-kubectl apply -f my-app-hpa.yaml
+
+
+⚠️ Important: For HPA based on CPU to work, you need the Metrics Server installed in your cluster (EKS doesn’t install it by default).
+
+
+how to check
+--------------
+
+🔍 1. List all HPAs
+*kubectl get hpa
+
+
+Example output:
+
+NAME          REFERENCE                   TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
+my-app-hpa    Deployment/my-app-deployment   60%/50%   2         5         3         2m
+
+
+TARGETS → 60%/50% means current CPU usage is 60%, target is 50%.
+
+REPLICAS → Current number of pods.
+
+MINPODS / MAXPODS → Range you set in HPA.
+
+🔍 2. Describe details of HPA
+*kubectl describe hpa my-app-hpa
+
+
+You’ll see:
+
+Which deployment it’s scaling (Scale target).
+
+Current vs. desired replicas.
+
+CPU utilization metrics.
+
+Events (if scaling happened).
+
+🔍 3. Check deployment replicas after scaling
+*kubectl get deployment my-app-deployment
+
+
+This shows how many pods are running and desired:
+
+NAME                READY   UP-TO-DATE   AVAILABLE   AGE
+my-app-deployment   4/4     4            4           10m
+
+🔍 4. Watch pods while scaling
+
+You can keep watching pods scaling up/down:
+
+*kubectl get pods -l app=my-app -w
+
+
+⚠️ Reminder: If you don’t see CPU values in HPA (<unknown> instead of %), then Metrics Server is not installed.
+
+
+
+check the metric server installed or not 
+------------------------------------------
+
+*kubectl get pods -n kube-system | grep metrics-server
+
+You should see a pod like:
+metrics-server-6c9c8c9b5c-abc12   1/1   Running   0   5m
+
+if in case not installed now install using these steps:
+------------------------------------------------------------
 
