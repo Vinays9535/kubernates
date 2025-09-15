@@ -1,0 +1,113 @@
+
+
+🚀 Deployment Strategies in Kubernetes
+
+When you update your app in Kubernetes, there are different ways (strategies) to roll out the new version.
+
+  
+1. Recreate Strategy
+---------------------
+
+How it works:
+Kubernetes deletes all old Pods first, then creates new Pods.
+
+Use case: When downtime is okay.
+
+Example:
+
+Old app v1 pods are stopped
+
+New app v2 pods are started
+
+Pros: Simple
+
+Cons: Causes downtime
+
+strategy:
+  type: Recreate
+
+    
+
+2. RollingUpdate Strategy (default)
+------------------------------------
+    
+How it works:
+Kubernetes gradually replaces old Pods with new Pods.
+
+Use case: When you want zero downtime.
+
+Example:
+
+Starts 1 new v2 Pod → Deletes 1 old v1 Pod → Repeats until all are v2
+
+Pros: No downtime
+
+Cons: Rollout may be slower
+
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1        # extra pod allowed above replicas
+    maxUnavailable: 1  # old pods that can be stopped during update
+
+      
+
+3. Blue-Green Deployment (not a built-in type, but common practice)
+-----------------------------------------------------------------------
+
+      
+How it works:
+Run two versions at the same time (Blue = old, Green = new).
+Switch traffic to Green when ready.
+
+Use case: Safer upgrades, easy rollback.
+
+Pros: Instant rollback
+
+Cons: Needs extra resources (running both versions).
+
+  
+
+4. Canary Deployment (also not built-in, done via Service/Istio)
+-----------------------------------------------------------------
+
+  
+How it works:
+Release the new version to a small % of users first.
+If it works fine → increase gradually.
+
+Use case: Testing new features safely.
+
+Pros: Reduces risk
+
+Cons: Needs traffic-splitting tools (e.g., Istio, service mesh).
+
+
+  
+
+✅ Summary in one line each:
+-------------------------------
+  -------------------------------
+Recreate → Delete old, then add new (downtime).
+
+RollingUpdate → Replace gradually (no downtime, default).
+
+Blue-Green → Run both, switch traffic at once.
+
+Canary → Test with few users, then expand.
+
+
+
+
+
+
+
+
+  1).  RollingUpdate Strategy (default)
+  ----------------------------------------
+
+  touch deployment.yaml
+  vim deployment.yaml
+
+
+  
