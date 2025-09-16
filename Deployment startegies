@@ -204,6 +204,7 @@ orrrrr creating a service with command also ::::
 *kubectl get svc my-service -w
 
 
+onece creted the deployment
 after we creating ROLLINGUPDATE STARTEGY
 ------------------------------------------
 
@@ -235,6 +236,144 @@ shows the rolled back to partiqulor version.
 
 2) Blue green or old new deploymnt startegy ::
 ---------------------------------------------------
+
+
+touch deployment1.yaml
+vim deployment1.yaml
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: my-deployment-blue
+  name: my-deployment-blue
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: my-deployment-blue
+      version: 7
+  template:
+    metadata:
+      labels:
+        run: my-deployment-blue
+        version: 7
+    spec:
+      containers:
+        - name: my-deployment-blue
+          image: vinaykumars064/cicd-repo:7
+          ports:
+            - containerPort: 8010
+
+
+* kubectl apply -f my-deployment1.yaml
+* kubectl get pods
+
+
+now creating service
+---------------------
+
+touch service.yaml
+vim service.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    run: app
+    version: 7
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 8010
+  type: LoadBalancer
+
+* kubectl apply -f service.yaml
+* kubectl get svc
+
+
+now compleating the deployment and service creation
+now one deployment is running live in production, now we requrement is update or upgrade the same running applicton with zero down time using blue green deployment startegy.
+
+
+** cp deployment1.yaml deployment2.yaml
+** vim deployment2.yaml
+
+now change the name and version in same deployment file then again deploy
+
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: my-deployment-green
+  name: my-deployment-green
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: my-deployment-green
+      version: latest
+  template:
+    metadata:
+      labels:
+        run: my-deployment-green
+        version: latest
+    spec:
+      containers:
+        - name: my-deployment-green
+          image: vinaykumars064/cicd-repo:latest
+          ports:
+            - containerPort: 8010
+
+** kubectl apply -f deployment2.yaml
+** kubectl get pods
+
+now we go to the service 
+--------------------------
+
+choose the same old service file then just change version
+
+**vim service.yaml
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    run: app
+    version: latest
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 8010
+  type: LoadBalancer
+
+
+** kubectl apply -f service.yaml
+** kubectl get svc
+
+these type using creting the blue green deployment startegy
+
+#Blue-Green deployment is a release strategy to minimize downtime and risk.
+#You run two environments:
+#Blue → the current running version (production).
+#Green → the new version to be deployed.
+#Traffic is initially routed to Blue.
+#You deploy and test the new version in Green without affecting users.
+#Once validated, you switch traffic from Blue to Green.
+#If issues occur, you can quickly roll back by redirecting traffic to Blue again.
+
+👉 This ensures zero downtime and safe rollbacks.
+
 
 
 
