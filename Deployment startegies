@@ -208,21 +208,33 @@ after we creating ROLLINGUPDATE STARTEGY
 ------------------------------------------
 
 *vim deployment.yaml
-chang the version of dockerfile then save and quit
+chang the version of dockerfile then save and quit.
 
 again apply the deployment on same deployment
 * kubectl apply -f deployment.yaml
-shows: configured
+shows: configured.
 
 ** kubectl rollout status deployments/my-deployment
-shows the succesfully rollout
+shows the succesfully rollout.
 
 ** kubectl rollout history deployment/my-deployment
-shows the old version changed the new version
+shows the old version changed the new version.
 
 ** kubectl rollout undo deployments/my-deployment
-shows the rolled back 
+shows the rolled back. 
 
 ** kubectl rollout history deployment/my-deployment
-shows the old version changed the new version
+shows the old version changed the new version.
+
+** kubectl rollout undo deployments/my-deployment --to-revision=2
+shows the rolled back to partiqulor version.
+
+
+
+
+
+2) Blue green or old new deploymnt startegy ::
+---------------------------------------------------
+
+
 
