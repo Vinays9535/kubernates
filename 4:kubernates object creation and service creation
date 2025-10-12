@@ -314,6 +314,7 @@ Example:
 curl http://10.96.172.34:80
 
 
+testing eccess or not ::: kubectl exec -it my-app-deployment-6fc6498df4-65rqs -- bash -lc "apt-get update && apt-get install -y curl && curl -v http://172.20.142.239:8010"
 
 
 if you not install the curl you will install the curl 
